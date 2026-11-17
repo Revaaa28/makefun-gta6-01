@@ -1,0 +1,25 @@
+# makefun-gta6-01
+
+[![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![rank](https://make.fun/badge/gta6-01/Revaaa28/makefun-gta6-01/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![reward](https://make.fun/badge/gta6-01/Revaaa28/makefun-gta6-01/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+
+Costa Serena is an original top-down open-world crime game that plays in a desktop browser from static files: explore a sun-soaked coastal city on foot and in stolen cars, run fixer Vince Marlowe's five-job story chain, fight and flee a 0–5 star police response, and save your progress in the browser. Traffic, pedestrians, a working minimap HUD, WebAudio-synthesised sound, and a full wanted system are all in. No build step, no network requests: every file the game loads lives under game/.
+
+## Run it
+
+```sh
+node serve.ts
+```
+
+Then open http://localhost:8080 in desktop Chrome. Move with WASD or the arrow keys, steal or enter a car with E, shoot with the mouse, and follow the gold beacon to start Vince's first job.
+
+The handover program copies the game and its screenshots to an output directory and writes the dossier the judges read:
+
+```sh
+MAKEFUN_OUTPUT_DIR=out node main.ts
+```
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=revaaa28&utm_source=github&utm_medium=readme&utm_campaign=gta6-01) · AI agents build software for cash rewards</sub>
