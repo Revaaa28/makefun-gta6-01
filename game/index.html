@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Costa Serena — a tiny open-world crime game</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #10131a; }
+  body { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; color: #f5efe2; }
+  #game { position: fixed; inset: 0; display: block; cursor: crosshair; }
+  body.on-title #hud-topleft, body.on-title #hud-topright, body.on-title #hud-hint,
+  body.on-title #hud-bottomright, body.on-title #hud-objective { display: none; }
+
+  .panel {
+    background: rgba(12, 16, 24, 0.72);
+    border: 1px solid rgba(255, 210, 61, 0.35);
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+  }
+
+  /* --- HUD --- */
+  #hud-topleft { position: fixed; top: 14px; left: 14px; padding: 10px 14px; min-width: 190px; z-index: 5; }
+  #hud-cash { font-size: 24px; font-weight: 800; color: #7be495; letter-spacing: 0.4px; }
+  #hud-health { height: 11px; background: rgba(255,255,255,0.16); border-radius: 6px; margin-top: 7px; overflow: hidden; }
+  #hud-health-fill { height: 100%; width: 100%; background: #58c472; border-radius: 6px; transition: width 0.15s; }
+  #hud-topleft .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.6px; color: #cbbfa5; margin-top: 6px; }
+
+  #hud-topright { position: fixed; top: 14px; right: 14px; text-align: right; z-index: 5; }
+  #hud-stars { font-size: 26px; color: #ffd23d; text-shadow: 0 2px 8px rgba(0,0,0,0.7); min-height: 32px; letter-spacing: 2px; }
+  #minimap { border-radius: 10px; border: 1px solid rgba(255,210,61,0.4); box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
+
+  #hud-timer { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); font-size: 30px; font-weight: 800; color: #ffe9a8; text-shadow: 0 2px 10px rgba(0,0,0,0.8); z-index: 5; display: none; }
+
+  #hud-objective {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+    padding: 10px 22px; z-index: 5; display: none; max-width: 72vw; text-align: center;
+  }
+  #hud-objective .label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #ffd23d; }
+  #hud-objective-text { font-size: 17px; font-weight: 600; margin-top: 2px; }
+
+  #hud-bottomright { position: fixed; right: 14px; bottom: 14px; padding: 9px 14px; z-index: 5; text-align: right; min-width: 120px; }
+  #hud-ammo { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+  #hud-speed { font-size: 22px; font-weight: 800; color: #ffe9a8; display: none; }
+
+  #hud-hint { position: fixed; left: 14px; bottom: 14px; padding: 8px 12px; z-index: 5; font-size: 13px; color: #e8dfc8; }
+
+  #hud-message {
+    position: fixed; top: 17%; left: 50%; transform: translateX(-50%);
+    font-size: 27px; font-weight: 800; color: #ffe9a8; text-align: center;
+    text-shadow: 0 3px 14px rgba(0,0,0,0.85); z-index: 6; display: none; max-width: 84vw;
+  }
+
+  #hud-bust {
+    position: fixed; top: 58%; left: 50%; transform: translateX(-50%);
+    width: 300px; padding: 9px 13px; z-index: 6; display: none; text-align: center;
+  }
+  #hud-bust .label { font-size: 11px; letter-spacing: 2.4px; color: #ff8a7a; font-weight: 700; }
+  #hud-bust-track { height: 10px; background: rgba(255,255,255,0.15); border-radius: 5px; margin-top: 6px; overflow: hidden; }
+  #hud-bust-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #3d7bd9, #d94f3d); }
+
+  /* --- Overlays --- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 20; display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+    background: radial-gradient(ellipse at center, rgba(10,12,20,0.25) 0%, rgba(10,12,20,0.78) 100%);
+    text-align: center; padding: 24px;
+  }
+  .overlay.show { display: flex; }
+  .game-title {
+    font-size: clamp(48px, 9vw, 104px); font-weight: 900; letter-spacing: 3px; line-height: 0.95;
+    background: linear-gradient(180deg, #ffe9a8 15%, #f4b942 48%, #e2703a 85%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 4px 0 rgba(90,30,10,0.55)) drop-shadow(0 10px 26px rgba(0,0,0,0.6));
+  }
+  .tagline { font-size: clamp(15px, 2.2vw, 21px); color: #ffe9a8; margin-top: 10px; font-style: italic; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  .blurb { max-width: 620px; margin-top: 18px; font-size: 15.5px; line-height: 1.55; color: #efe7d3; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
+  .controls {
+    margin-top: 20px; padding: 14px 22px; font-size: 13.5px; line-height: 1.75; color: #e8dfc8; text-align: left;
+  }
+  .controls b { color: #ffd23d; font-weight: 700; }
+  .btn {
+    margin-top: 22px; padding: 13px 42px; font-size: 18px; font-weight: 800; letter-spacing: 1.2px;
+    color: #23180a; background: linear-gradient(180deg, #ffd964, #f0a832); border: none; border-radius: 999px;
+    cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.secondary { background: linear-gradient(180deg, #e8ecf2, #aeb8c6); color: #1c2733; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .big-word { font-size: clamp(44px, 8vw, 84px); font-weight: 900; letter-spacing: 4px; color: #ff6b5e; text-shadow: 0 6px 30px rgba(0,0,0,0.8); }
+  .big-word.blue { color: #7db4ff; }
+  .overlay p.sub { margin-top: 12px; font-size: 16px; color: #efe7d3; text-shadow: 0 1px 6px rgba(0,0,0,0.9); max-width: 560px; line-height: 1.5; }
+
+  /* --- Phone (mission intros) --- */
+  #phone { background: rgba(8, 10, 16, 0.45); }
+  .phone-card {
+    width: min(380px, 92vw); border-radius: 26px; padding: 22px 22px 18px; text-align: left;
+    background: linear-gradient(165deg, #232936, #12151d); border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+  }
+  .phone-card .from { font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase; color: #8fd0ff; }
+  .phone-card .title { font-size: 21px; font-weight: 800; margin-top: 5px; color: #ffe9a8; }
+  .phone-card .text { font-size: 15px; line-height: 1.55; margin-top: 10px; color: #e9e4d4; }
+  .phone-card .reward { margin-top: 12px; font-size: 14px; color: #7be495; font-weight: 700; }
+  .phone-card .btn { width: 100%; margin-top: 16px; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="hud-topleft" class="panel">
+  <div id="hud-cash">$0</div>
+  <div id="hud-health"><div id="hud-health-fill"></div></div>
+  <div class="label">Costa Serena</div>
+</div>
+<div id="hud-topright">
+  <div id="hud-stars"></div>
+  <canvas id="minimap" width="216" height="156"></canvas>
+</div>
+<div id="hud-timer">0:00</div>
+<div id="hud-message"></div>
+<div id="hud-bust" class="panel">
+  <div class="label">⚠ BUSTED ⚠</div>
+  <div id="hud-bust-track"><div id="hud-bust-fill"></div></div>
+</div>
+<div id="hud-objective" class="panel">
+  <div class="label">Objective</div>
+  <div id="hud-objective-text"></div>
+</div>
+<div id="hud-hint" class="panel"></div>
+<div id="hud-bottomright" class="panel">
+  <div id="hud-ammo">PISTOL 12 / ∞</div>
+  <div id="hud-speed">0 mph</div>
+</div>
+
+<!-- Title screen -->
+<div id="title-screen" class="overlay show">
+  <div class="game-title">COSTA<br>SERENA</div>
+  <div class="tagline">Sun, sand, and other people's cars.</div>
+  <p class="blurb">You are nobody in a coastal city that runs on favours. Fixer <b>Vince Marlowe</b> has work:
+    packages to move, cars to borrow, buyers to meet — and a police force with nothing better to do.
+    Run his five jobs, build your bankroll, and when the last boat leaves the pier… be on it.</p>
+  <div class="controls panel">
+    <b>WASD / Arrows</b> — move &amp; drive &nbsp;·&nbsp; <b>Shift</b> — sprint<br>
+    <b>E</b> — steal / enter / exit car &nbsp;·&nbsp; <b>Space</b> — handbrake (in car) / melee (on foot)<br>
+    <b>Mouse</b> — aim &nbsp;·&nbsp; <b>Click</b> — shoot &nbsp;·&nbsp; <b>R</b> — reload &nbsp;·&nbsp; <b>F</b> — melee<br>
+    <b>Esc / P</b> — pause &nbsp;·&nbsp; <b>M</b> — mute
+  </div>
+  <div>
+    <button id="btn-start" class="btn">START</button>
+    <button id="btn-continue" class="btn secondary">CONTINUE</button>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="pause-screen" class="overlay">
+  <div class="big-word blue">PAUSED</div>
+  <p class="sub">The city waits. It is good at that.</p>
+  <button id="btn-resume" class="btn">RESUME</button>
+</div>
+
+<!-- Busted -->
+<div id="busted-screen" class="overlay">
+  <div class="big-word blue">BUSTED</div>
+  <p class="sub" id="busted-text">The police walk you to the station, take their cut, and let you go — this time.</p>
+  <button id="btn-busted-ok" class="btn">WALK OUT</button>
+</div>
+
+<!-- Wasted -->
+<div id="gameover-screen" class="overlay">
+  <div class="big-word">WASTED</div>
+  <p class="sub">You wake up outside the clinic with a headache and lighter pockets. Costa Serena forgets nothing, but it forgives — for a fee.</p>
+  <button id="btn-restart" class="btn">GET UP</button>
+</div>
+
+<!-- Phone: mission intro -->
+<div id="phone" class="overlay">
+  <div class="phone-card">
+    <div class="from" id="phone-from">Incoming call</div>
+    <div class="title" id="phone-title">Job</div>
+    <div class="text" id="phone-text"></div>
+    <div class="reward" id="phone-reward"></div>
+    <button id="btn-accept" class="btn">ACCEPT JOB</button>
+  </div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
