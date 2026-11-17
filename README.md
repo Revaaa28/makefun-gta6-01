@@ -6,6 +6,15 @@
 
 Costa Serena is an original top-down open-world crime game that plays in a desktop browser from static files: explore a sun-soaked coastal city on foot and in stolen cars, run fixer Vince Marlowe's five-job story chain, fight and flee a 0–5 star police response, and save your progress in the browser. Traffic, pedestrians, a working minimap HUD, WebAudio-synthesised sound, and a full wanted system are all in. No build step, no network requests: every file the game loads lives under game/.
 
+## What's in the game
+
+- A seeded coastal city on a 6×5 road grid: named bars, clubs, hotels and shops, parking lots full of stealable cars, parks, a beach and a pier.
+- Five story jobs from fixer Vince Marlowe, told through phone intros: a package run, a marked-car theft, a buyer meet that needs the heat lost first, a timed cross-town delivery, and a three-star pier getaway.
+- A living street: lane-keeping traffic that brakes, honks and panics, and pedestrians who stroll, wait and flee.
+- A 0–5 star wanted system: witnessed crimes add heat, police cruisers hunt your last known position and ram, and cornering you fills the bust meter.
+- Mouse-aim pistol combat with melee, health and regeneration, plus a busted and wasted flow with fines and respawns.
+- HUD with cash, health, stars, objective banner and a live minimap; progress, cash and position persist in localStorage.
+
 ## Run it
 
 ```sh
