@@ -80,9 +80,11 @@ export const PALETTE = {
   waterDeep: '#256a9c',
   waterFoam: '#bfe6f5',
   roofShadow: 'rgba(46,32,16,0.35)',
+  sunShadow: 'rgba(43,24,38,0.30)',   // long dusk shadow cast by buildings and cars
   tint: 'rgba(255,166,66,0.10)',   // golden-hour wash over everything
   dockWood: '#8a6a44',
   dockDark: '#6f5433',
+  wetSheen: 'rgba(255,241,205,0.20)',  // sunset light skimming the wet sand
 };
 
 // Building colour families: walls are only hinted at top-down, roofs carry the colour.
@@ -94,6 +96,16 @@ export const ROOF_COLORS = [
 export const CAR_COLORS = [
   '#d94f3d', '#3d7bd9', '#f2b33d', '#53b06a', '#e8e6df', '#33383f',
   '#8e44ad', '#e67e22', '#16a3a3', '#c0c6cc', '#7a4a2b', '#e58bb1',
+  '#274156', '#7f1d2d', '#2e6f5e', '#d9c26a', '#5b8dd9', '#9046c9',
+  '#c75b39', '#4a4e57', '#8fb8c9', '#6aa84f', '#b03a5b', '#e3e0d5',
 ];
+
+// Neon sign colours for the clubs and bars, and awning stripes for shop fronts.
+export const NEON_COLORS = {
+  CLUB: ['#ff4fd8', '#b26bff', '#4fd8ff'],
+  BAR: ['#ffb347', '#ff5e5e', '#ffd23d'],
+  HOTEL: ['#57c7ff', '#7be495'],
+};
+export const AWNING_COLORS = ['#d94f3d', '#3d7bd9', '#e2703a', '#17a398', '#c75b39'];
 
 export const SAVE_KEY = 'costa-serena-save-v1';

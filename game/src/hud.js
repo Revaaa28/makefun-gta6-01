@@ -43,6 +43,12 @@ export function updateHud() {
   const stars = S.wanted.stars;
   els.stars.textContent = stars > 0 ? '★'.repeat(stars) + '☆'.repeat(5 - stars) : '';
   els.stars.style.opacity = stars > 0 ? '1' : '0';
+  // Just gained a star: the row swells and burns brighter while the pulse lasts.
+  const pulse = S.fx.starPulse;
+  els.stars.style.transform = pulse > 0 ? 'scale(' + (1 + 0.32 * pulse).toFixed(3) + ')' : '';
+  els.stars.style.textShadow = pulse > 0.4
+    ? '0 0 18px rgba(255,64,40,0.95), 0 2px 8px rgba(0,0,0,0.7)'
+    : '';
 
   if (S.objective) {
     els.objective.style.display = 'block';
@@ -144,4 +150,11 @@ function drawMinimap() {
   c.moveTo(6, 0); c.lineTo(-4, -3.6); c.lineTo(-4, 3.6);
   c.closePath(); c.fill(); c.stroke();
   c.restore();
+  // A soft gold inner border so the map reads as a lit instrument, not a sticker.
+  c.strokeStyle = 'rgba(255,210,61,0.28)';
+  c.lineWidth = 5;
+  c.strokeRect(0, 0, W, H);
+  c.strokeStyle = 'rgba(255,240,190,0.5)';
+  c.lineWidth = 1.4;
+  c.strokeRect(1, 1, W - 2, H - 2);
 }

@@ -9,7 +9,7 @@ import { rng } from './random.js';
 import { isSolid } from './world.js';
 import { hurtPed, scarePedsNear } from './pedestrians.js';
 import { reportCrime, } from './police.js';
-import { burst, panicTrafficNear } from './vehicles.js';
+import { burst, smoke, panicTrafficNear } from './vehicles.js';
 import { sfx } from './audio.js';
 
 export const weapon = {
@@ -47,6 +47,9 @@ export function tryShoot(world) {
   });
   weapon.muzzle = 0.05;
   p.angle = angle;
+  // A tongue of sparks and a breath of smoke at the muzzle.
+  burst(p.x + Math.cos(angle) * 30, p.y + Math.sin(angle) * 30, 3, '#ffd76a');
+  smoke(p.x + Math.cos(angle) * 34, p.y + Math.sin(angle) * 34, 1, 4);
   S.camera.shake = Math.min(10, S.camera.shake + 1.2);
   sfx.shot();
   reportCrime('shotFired');
@@ -100,7 +103,8 @@ export function updateBullets(world, dt) {
       b.x += (b.vx * dt) / steps;
       b.y += (b.vy * dt) / steps;
       if (isSolid(world, b.x, b.y, -2)) {
-        burst(b.x, b.y, 4, '#ffd27a');
+        burst(b.x, b.y, 7, '#ffd76a');       // impact sparks off masonry
+        smoke(b.x, b.y, 1, 5);               // and a puff of dust
         consumed = true;
         break;
       }
@@ -121,7 +125,8 @@ export function updateBullets(world, dt) {
         if (Math.abs(car.x - b.x) < car.len / 2 && Math.abs(car.y - b.y) < car.len / 2 &&
             Math.hypot(car.x - b.x, car.y - b.y) < car.len * 0.55) {
           car.health -= COMBAT.BULLET_DAMAGE;
-          burst(b.x, b.y, 5, '#ffd27a');
+          burst(b.x, b.y, 8, '#ffd76a');     // sparks off bodywork
+          smoke(b.x, b.y, 1, 5);
           if (car.kind === 'police' || car.driver === 'player') reportCrime('resisting', car.x, car.y);
           else reportCrime('shotHitCar', car.x, car.y);
           if (car.health <= 0 && !car.dead) { car.dead = true; burst(car.x, car.y, 24, '#3a3f45'); }

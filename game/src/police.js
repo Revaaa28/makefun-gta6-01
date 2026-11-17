@@ -37,6 +37,7 @@ export function reportCrime(kind, x = S.player.x, y = S.player.y) {
   S.wanted.lastCrimeAt = S.time;
   S.wanted.lastKnown = { x, y };
   if (S.wanted.stars > before && S.wanted.stars > 0) {
+    S.fx.starPulse = 1;   // red vignette pulse + the HUD stars swell
     showMessage(S.wanted.stars >= 3 ? 'The heat is on — lose them!' : 'Wanted: the police are coming', 2.4);
   }
 }

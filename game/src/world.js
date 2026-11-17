@@ -4,7 +4,7 @@
 // horizontal avenues, six vertical streets, beach and water along the south edge,
 // and a wooden pier reaching into the bay at the south-east (the docks).
 
-import { WORLD, PALETTE, ROOF_COLORS } from './config.js';
+import { WORLD, PALETTE, ROOF_COLORS, NEON_COLORS, AWNING_COLORS } from './config.js';
 import { RNG } from './random.js';
 
 const HW = WORLD.ROAD_W / 2; // half road width
@@ -103,13 +103,22 @@ function fillBlock(world, rand, bx, by, bw, bh) {
     const floors = rand.int(2, 11);
     const ac = [];
     const acCount = rand.int(1, 4);
-    for (let i = 0; i < acCount; i++) ac.push({ dx: rand.range(6, w - 26), dy: rand.range(6, h - 20) });
+    for (let i = 0; i < acCount; i++) {
+      ac.push({ dx: rand.range(6, w - 26), dy: rand.range(6, h - 20), kind: rand.weighted([['ac', 5], ['vent', 2], ['box', 2]]) });
+    }
+    const sign = rand.chance(0.4) ? rand.pick(SIGN_WORDS) : null;
+    // Clubs and bars burn neon after dark; some hotels join in. Signed shops
+    // often wear a striped awning over the pavement.
+    const neonSet = sign ? NEON_COLORS[sign] : null;
+    const neon = neonSet && (sign !== 'HOTEL' || rand.chance(0.5)) ? rand.pick(neonSet) : null;
     world.buildings.push({
       x, y, w, h, floors,
       roof: rand.pick(ROOF_COLORS),
       trim: rand.pick(['#f5efe2', '#d8cdb4', '#aebfd0', '#e8b4a0']),
       ac,
-      sign: rand.chance(0.4) ? rand.pick(SIGN_WORDS) : null,
+      sign,
+      neon,
+      awning: sign && rand.chance(0.55) ? rand.pick(AWNING_COLORS) : null,
     });
   }
 }

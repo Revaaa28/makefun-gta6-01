@@ -142,6 +142,12 @@ export function driveCar(car, dt, input) {
   }
   car.speed -= car.speed * CAR.DRAG * dt;
   if (handbrake) car.speed -= car.speed * 1.4 * dt;
+  // Wheelspin: flooring it from a crawl shreds the rear tyres into smoke.
+  if (throttle > 0 && car.speed > 4 && car.speed < 75 && rng.chance(0.55)) {
+    const bx = car.x - Math.cos(car.angle) * car.len * 0.38;
+    const by = car.y - Math.sin(car.angle) * car.len * 0.38;
+    smoke(bx, by, 1, car.wid * 0.7);
+  }
   const speedFactor = clamp(Math.abs(car.speed) / 120, 0, 1) * Math.sign(car.speed || 1);
   car.angle += steer * CAR.STEER * speedFactor * dt * (handbrake ? 1.7 : 1);
   moveCar(car, dt, handbrake);
@@ -171,6 +177,12 @@ export function moveCar(car, dt, drifting = false) {
       if (S.skidmarks.length > 420) S.skidmarks.splice(0, S.skidmarks.length - 420);
     }
     car.skidL = l; car.skidR = r;
+    // Tyre smoke boils off the rear wheels while the marks go down.
+    car._smokeT = (car._smokeT || 0) - dt;
+    if (car._smokeT <= 0) {
+      car._smokeT = 0.03;
+      smoke((l.x + r.x) / 2, (l.y + r.y) / 2, drifting ? 2 : 1, car.wid * 0.8);
+    }
   } else { car.skidL = null; car.skidR = null; }
   car.movedDist = Math.hypot(car.x - prevX, car.y - prevY);
 }
@@ -178,6 +190,7 @@ export function moveCar(car, dt, drifting = false) {
 export function onCarCrash(car, speed) {
   car.health -= speed * 0.06;
   S.camera.shake = Math.min(14, S.camera.shake + speed * 0.03);
+  if (speed > 280) S.camera.shake = Math.min(19, S.camera.shake + 4); // the big ones rattle your teeth
   sfx.crash(speed > 240);
   burst(car.x, car.y, 8, '#ffd27a');
   if (car.driver === 'player') {
@@ -192,6 +205,21 @@ export function burst(x, y, n, color) {
     const a = rng.range(0, Math.PI * 2), sp = rng.range(30, 190);
     S.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rng.range(0.25, 0.6), maxLife: 0.6, color, size: rng.range(1.5, 3.5) });
   }
+}
+
+// Soft round puffs that swell and fade — tyre smoke, dust, gun smoke. Rendered
+// as growing circles by render.js (pt.round), unlike the square burst sparks.
+export function smoke(x, y, n = 1, spread = 14) {
+  for (let i = 0; i < n; i++) {
+    const life = rng.range(0.45, 0.95);
+    S.particles.push({
+      x: x + rng.range(-spread, spread) * 0.4, y: y + rng.range(-spread, spread) * 0.4,
+      vx: rng.range(-26, 26), vy: rng.range(-30, -6),
+      life, maxLife: life, color: '#dfe3e6', size: rng.range(5, 9),
+      round: true, alphaMul: 0.5,
+    });
+  }
+  if (S.particles.length > 500) S.particles.splice(0, S.particles.length - 500);
 }
 
 // --- Traffic AI ---------------------------------------------------------------

@@ -130,6 +130,7 @@ function setStars(n) {
   S.wanted.heat = WANTED.THRESHOLDS[n] + 15;
   S.wanted.stars = starsForHeat(S.wanted.heat);
   S.wanted.lastCrimeAt = S.time;
+  S.fx.starPulse = 1;
   reportCrimeSilent();
 }
 function reportCrimeSilent() { /* heat already set; just keep the cops informed */ S.wanted.lastKnown = { x: S.player.x, y: S.player.y }; }

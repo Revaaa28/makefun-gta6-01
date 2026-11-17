@@ -236,6 +236,7 @@ function updateAmbient(dt) {
 }
 
 function updateFx(dt) {
+  if (S.fx.starPulse > 0) S.fx.starPulse = Math.max(0, S.fx.starPulse - dt * 1.25);
   for (let i = S.particles.length - 1; i >= 0; i--) {
     const pt = S.particles[i];
     pt.life -= dt;

@@ -41,6 +41,7 @@ export const S = {
   },
 
   camera: { x: 840, y: 900, shake: 0, zoom: 1 },
+  fx: { starPulse: 0 },     // 1 → 0 decay after a wanted star is gained (vignette + HUD pulse)
   input: {
     keys: {}, mouseX: 0, mouseY: 0, mouseDown: false,
     interactPressed: false,   // edge-triggered E
@@ -68,6 +69,7 @@ export function resetRunState() {
   S.skidmarks.length = 0;
   S.floaters.length = 0;
   S.wanted.heat = 0; S.wanted.stars = 0; S.wanted.seenByCop = false;
+  S.fx.starPulse = 0;
   S.bust.meter = 0; S.bust.active = false;
   S.player.health = 100; S.player.dead = false; S.player.car = null;
   S.player.vx = 0; S.player.vy = 0;
